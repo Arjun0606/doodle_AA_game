@@ -1,12 +1,22 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import { useState } from 'react';
 
 export default function MessageNote() {
+  const [isClosing, setIsClosing] = useState(false);
+
+  const handleClose = () => {
+    setIsClosing(true);
+  };
+
+  if (isClosing) return null;
+
   return (
     <motion.div
       initial={{ scale: 0, rotate: -180 }}
       animate={{ scale: 1, rotate: 0 }}
+      exit={{ scale: 0, opacity: 0 }}
       transition={{
         type: 'spring',
         stiffness: 200,
@@ -19,6 +29,7 @@ export default function MessageNote() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         className="absolute inset-0 bg-black/20 backdrop-blur-sm"
+        onClick={handleClose}
       />
 
       {/* Note Paper */}
@@ -30,6 +41,14 @@ export default function MessageNote() {
         whileHover={{ rotate: [0, -1, 1, 0] }}
         transition={{ duration: 0.5 }}
       >
+        {/* Close Button */}
+        <button
+          onClick={handleClose}
+          className="absolute top-4 right-4 w-10 h-10 flex items-center justify-center bg-gray-200 hover:bg-gray-300 rounded-full border-3 border-black text-black font-bold text-xl transition-all hover:scale-110 z-10"
+          aria-label="Close"
+        >
+          ×
+        </button>
         {/* Decorative elements */}
         <div className="absolute -top-3 -right-3 text-4xl">🕊️</div>
         <div className="absolute -bottom-3 -left-3 text-3xl">💕</div>

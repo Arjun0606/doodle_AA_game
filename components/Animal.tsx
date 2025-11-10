@@ -86,7 +86,7 @@ export default function Animal({
       className="relative flex flex-col items-center"
       whileHover={fullness < 100 && isDraggingFood ? { scale: 1.05 } : {}}
     >
-      {/* Animal Body - SVG Doodle Style */}
+      {/* Animal Body - Hand-drawn Doodle Style */}
       <motion.div
         animate={{
           scale: isEating ? [1, 1.1, scale] : scale,
@@ -96,76 +96,221 @@ export default function Animal({
         className="relative"
       >
         <svg
-          width="120"
-          height="120"
-          viewBox="0 0 120 120"
-          className="doodle-outline"
+          width="140"
+          height="160"
+          viewBox="0 0 140 160"
+          className="filter drop-shadow-lg"
         >
-          {/* Body */}
-          <ellipse
-            cx="60"
-            cy="70"
-            rx={35 + fullness * 0.15}
-            ry={40 + fullness * 0.2}
-            fill={animalColors[type]}
-            stroke="#000"
-            strokeWidth="3"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
+          <defs>
+            <filter id="roughen">
+              <feTurbulence baseFrequency="0.05" numOctaves="2" result="noise" seed="2" />
+              <feDisplacementMap in="SourceGraphic" in2="noise" scale="2" />
+            </filter>
+          </defs>
           
-          {/* Head */}
-          <circle
-            cx="60"
-            cy="35"
-            r={25 + fullness * 0.1}
-            fill={animalColors[type]}
-            stroke="#000"
-            strokeWidth="3"
-          />
-          
-          {/* Eyes */}
-          <circle cx="52" cy="32" r="4" fill="#000" />
-          <circle cx="68" cy="32" r="4" fill="#000" />
-          
-          {/* Mouth */}
-          <path
-            d={fullness >= 100 ? "M 50 42 Q 60 50 70 42" : "M 50 42 Q 60 48 70 42"}
-            stroke="#000"
-            strokeWidth="2"
-            fill="none"
-            strokeLinecap="round"
-          />
-          
-          {/* Ears/Features based on type */}
           {type === 'cat' && (
             <>
-              <path d="M 40 25 L 35 10 L 45 20" fill={animalColors[type]} stroke="#000" strokeWidth="2" />
-              <path d="M 80 25 L 85 10 L 75 20" fill={animalColors[type]} stroke="#000" strokeWidth="2" />
+              {/* Cat Body - wobbly hand-drawn */}
+              <path
+                d={`M 70 ${80 - fullness * 0.2} 
+                   Q 85 ${75 - fullness * 0.3} 95 ${85 - fullness * 0.25}
+                   Q 100 ${100 - fullness * 0.3} 95 ${115 - fullness * 0.35}
+                   Q 90 ${125 - fullness * 0.4} 70 ${125 - fullness * 0.4}
+                   Q 50 ${125 - fullness * 0.4} 45 ${115 - fullness * 0.35}
+                   Q 40 ${100 - fullness * 0.3} 45 ${85 - fullness * 0.25}
+                   Q 55 ${75 - fullness * 0.3} 70 ${80 - fullness * 0.2} Z`}
+                fill={animalColors[type]}
+                stroke="#000"
+                strokeWidth="3"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                filter="url(#roughen)"
+              />
+              {/* Head */}
+              <path
+                d="M 70 50 Q 90 45 98 55 Q 100 65 95 75 Q 85 82 70 82 Q 55 82 45 75 Q 40 65 42 55 Q 50 45 70 50 Z"
+                fill={animalColors[type]}
+                stroke="#000"
+                strokeWidth="3"
+                filter="url(#roughen)"
+              />
+              {/* Cat Ears - pointy */}
+              <path d="M 48 52 L 35 30 L 52 45 Z" fill={animalColors[type]} stroke="#000" strokeWidth="3" />
+              <path d="M 92 52 L 105 30 L 88 45 Z" fill={animalColors[type]} stroke="#000" strokeWidth="3" />
+              {/* Eyes */}
+              <ellipse cx="58" cy="62" rx="5" ry="7" fill="#000" />
+              <ellipse cx="82" cy="62" rx="5" ry="7" fill="#000" />
+              <circle cx="60" cy="60" r="2" fill="#fff" />
+              <circle cx="84" cy="60" r="2" fill="#fff" />
+              {/* Whiskers */}
+              <line x1="35" y1="68" x2="48" y2="67" stroke="#000" strokeWidth="2" />
+              <line x1="35" y1="72" x2="48" y2="72" stroke="#000" strokeWidth="2" />
+              <line x1="92" y1="67" x2="105" y2="68" stroke="#000" strokeWidth="2" />
+              <line x1="92" y1="72" x2="105" y2="72" stroke="#000" strokeWidth="2" />
+              {/* Nose */}
+              <path d="M 70 68 L 66 73 L 70 75 L 74 73 Z" fill="#000" />
+              {/* Mouth */}
+              <path
+                d={fullness >= 100 ? "M 66 75 Q 70 82 74 75" : "M 66 75 Q 70 78 74 75"}
+                stroke="#000"
+                strokeWidth="2"
+                fill="none"
+              />
+              {/* Legs */}
+              <rect x="50" y="120" width="15" height="30" rx="7" fill={animalColors[type]} stroke="#000" strokeWidth="3" />
+              <rect x="75" y="120" width="15" height="30" rx="7" fill={animalColors[type]} stroke="#000" strokeWidth="3" />
             </>
           )}
+
           {type === 'bunny' && (
             <>
-              <ellipse cx="45" cy="10" rx="8" ry="20" fill={animalColors[type]} stroke="#000" strokeWidth="2" />
-              <ellipse cx="75" cy="10" rx="8" ry="20" fill={animalColors[type]} stroke="#000" strokeWidth="2" />
+              {/* Bunny Body */}
+              <ellipse
+                cx="70"
+                cy={90 - fullness * 0.3}
+                rx={35 + fullness * 0.25}
+                ry={38 + fullness * 0.35}
+                fill={animalColors[type]}
+                stroke="#000"
+                strokeWidth="3"
+                filter="url(#roughen)"
+              />
+              {/* Head */}
+              <ellipse
+                cx="70"
+                cy="55"
+                rx="28"
+                ry="30"
+                fill={animalColors[type]}
+                stroke="#000"
+                strokeWidth="3"
+                filter="url(#roughen)"
+              />
+              {/* Long Bunny Ears */}
+              <ellipse cx="55" cy="22" rx="10" ry="28" fill={animalColors[type]} stroke="#000" strokeWidth="3" transform="rotate(-15 55 22)" />
+              <ellipse cx="85" cy="22" rx="10" ry="28" fill={animalColors[type]} stroke="#000" strokeWidth="3" transform="rotate(15 85 22)" />
+              <ellipse cx="55" cy="25" rx="5" ry="18" fill="#ffb6d9" stroke="#000" strokeWidth="2" transform="rotate(-15 55 25)" />
+              <ellipse cx="85" cy="25" rx="5" ry="18" fill="#ffb6d9" stroke="#000" strokeWidth="2" transform="rotate(15 85 25)" />
+              {/* Eyes */}
+              <circle cx="60" cy="52" r="6" fill="#000" />
+              <circle cx="80" cy="52" r="6" fill="#000" />
+              <circle cx="62" cy="50" r="3" fill="#fff" />
+              <circle cx="82" cy="50" r="3" fill="#fff" />
+              {/* Nose */}
+              <ellipse cx="70" cy="62" rx="4" ry="3" fill="#ff69b4" />
+              {/* Mouth */}
+              <path
+                d={fullness >= 100 ? "M 65 68 Q 70 75 75 68" : "M 65 68 Q 70 72 75 68"}
+                stroke="#000"
+                strokeWidth="2"
+                fill="none"
+              />
+              <line x1="70" y1="62" x2="70" y2="68" stroke="#000" strokeWidth="2" />
+              {/* Legs */}
+              <ellipse cx="55" cy="125" rx="12" ry="18" fill={animalColors[type]} stroke="#000" strokeWidth="3" />
+              <ellipse cx="85" cy="125" rx="12" ry="18" fill={animalColors[type]} stroke="#000" strokeWidth="3" />
             </>
           )}
+
+          {type === 'frog' && (
+            <>
+              {/* Frog Body - round and chubby */}
+              <ellipse
+                cx="70"
+                cy={95 - fullness * 0.3}
+                rx={38 + fullness * 0.3}
+                ry={35 + fullness * 0.35}
+                fill={animalColors[type]}
+                stroke="#000"
+                strokeWidth="3"
+                filter="url(#roughen)"
+              />
+              {/* Head merged with body */}
+              <ellipse
+                cx="70"
+                cy="70"
+                rx="42"
+                ry="35"
+                fill={animalColors[type]}
+                stroke="#000"
+                strokeWidth="3"
+                filter="url(#roughen)"
+              />
+              {/* Big Frog Eyes on top */}
+              <circle cx="55" cy="52" r="18" fill={animalColors[type]} stroke="#000" strokeWidth="3" />
+              <circle cx="85" cy="52" r="18" fill={animalColors[type]} stroke="#000" strokeWidth="3" />
+              <circle cx="55" cy="55" r="10" fill="#fff" stroke="#000" strokeWidth="2" />
+              <circle cx="85" cy="55" r="10" fill="#fff" stroke="#000" strokeWidth="2" />
+              <circle cx="57" cy="53" r="6" fill="#000" />
+              <circle cx="87" cy="53" r="6" fill="#000" />
+              <circle cx="59" cy="51" r="3" fill="#fff" />
+              <circle cx="89" cy="51" r="3" fill="#fff" />
+              {/* Smile */}
+              <path
+                d={fullness >= 100 ? "M 50 85 Q 70 98 90 85" : "M 50 85 Q 70 92 90 85"}
+                stroke="#000"
+                strokeWidth="3"
+                fill="none"
+                strokeLinecap="round"
+              />
+              {/* Belly spot */}
+              <ellipse cx="70" cy="95" rx="20" ry="18" fill="#9ce88e" opacity="0.6" />
+              {/* Front legs */}
+              <ellipse cx="45" cy="115" rx="15" ry="20" fill={animalColors[type]} stroke="#000" strokeWidth="3" />
+              <ellipse cx="95" cy="115" rx="15" ry="20" fill={animalColors[type]} stroke="#000" strokeWidth="3" />
+            </>
+          )}
+
           {type === 'bear' && (
             <>
-              <circle cx="40" cy="20" r="10" fill={animalColors[type]} stroke="#000" strokeWidth="2" />
-              <circle cx="80" cy="20" r="10" fill={animalColors[type]} stroke="#000" strokeWidth="2" />
+              {/* Bear Body */}
+              <ellipse
+                cx="70"
+                cy={92 - fullness * 0.3}
+                rx={36 + fullness * 0.28}
+                ry={40 + fullness * 0.38}
+                fill={animalColors[type]}
+                stroke="#000"
+                strokeWidth="3"
+                filter="url(#roughen)"
+              />
+              {/* Head */}
+              <circle
+                cx="70"
+                cy="55"
+                r="32"
+                fill={animalColors[type]}
+                stroke="#000"
+                strokeWidth="3"
+                filter="url(#roughen)"
+              />
+              {/* Round Bear Ears */}
+              <circle cx="48" cy="35" r="14" fill={animalColors[type]} stroke="#000" strokeWidth="3" />
+              <circle cx="92" cy="35" r="14" fill={animalColors[type]} stroke="#000" strokeWidth="3" />
+              <circle cx="48" cy="37" r="8" fill="#ffa" stroke="#000" strokeWidth="2" />
+              <circle cx="92" cy="37" r="8" fill="#ffa" stroke="#000" strokeWidth="2" />
+              {/* Eyes */}
+              <circle cx="58" cy="52" r="5" fill="#000" />
+              <circle cx="82" cy="52" r="5" fill="#000" />
+              <circle cx="60" cy="50" r="2" fill="#fff" />
+              <circle cx="84" cy="50" r="2" fill="#fff" />
+              {/* Snout */}
+              <ellipse cx="70" cy="65" rx="18" ry="14" fill="#ffebb3" stroke="#000" strokeWidth="3" />
+              {/* Nose */}
+              <ellipse cx="70" cy="62" rx="6" ry="5" fill="#000" />
+              {/* Mouth */}
+              <path
+                d={fullness >= 100 ? "M 62 70 Q 70 78 78 70" : "M 62 70 Q 70 74 78 70"}
+                stroke="#000"
+                strokeWidth="2"
+                fill="none"
+              />
+              {/* Legs */}
+              <ellipse cx="52" cy="130" rx="13" ry="20" fill={animalColors[type]} stroke="#000" strokeWidth="3" />
+              <ellipse cx="88" cy="130" rx="13" ry="20" fill={animalColors[type]} stroke="#000" strokeWidth="3" />
             </>
           )}
-          
-          {/* Legs */}
-          <rect x="40" y="95" width="12" height="20" rx="6" fill={animalColors[type]} stroke="#000" strokeWidth="2" />
-          <rect x="68" y="95" width="12" height="20" rx="6" fill={animalColors[type]} stroke="#000" strokeWidth="2" />
         </svg>
-
-        {/* Emoji overlay for extra cuteness */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-4xl opacity-30 pointer-events-none">
-          {animalEmojis[type]}
-        </div>
       </motion.div>
 
       {/* Fullness Bar */}

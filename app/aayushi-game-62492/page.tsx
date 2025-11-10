@@ -32,7 +32,7 @@ const CAT_SPRITES: Record<CatState, SpriteConfig> = {
   eating: { sheet: '/cat-sprites/eating.png', frames: 15 },
   playing: { sheet: '/cat-sprites/excited.png', frames: 12 },
   cuddling: { sheet: '/cat-sprites/laydown.png', frames: 12 },
-  bathing: { sheet: '/cat-sprites/sleepy.png', frames: 8 },
+  bathing: { sheet: '/cat-sprites/surprised.png', frames: 12 },
 };
 
 export default function AayushisPetCafe() {
@@ -162,47 +162,76 @@ export default function AayushisPetCafe() {
         />
       </div>
 
-      {/* Room Decorations */}
+      {/* Room Decorations - More Interactive & Dynamic */}
       <div className="absolute inset-0">
-        {/* Bowl bottom left */}
+        {/* Bowl bottom left - bounces */}
         <motion.div
-          animate={{ y: [0, -3, 0] }}
+          animate={{ y: [0, -5, 0] }}
           transition={{ duration: 2, repeat: Infinity }}
-          className="absolute left-[15%] bottom-[20%] z-10"
+          whileHover={{ scale: 1.1 }}
+          className="absolute left-[12%] bottom-[18%] z-10 cursor-pointer"
         >
-          <Image src="/cat-items/bowls.png" alt="bowl" width={80} height={60} className="pixelated" />
+          <Image src="/cat-items/bowls.png" alt="bowl" width={90} height={70} className="pixelated drop-shadow-lg" />
         </motion.div>
 
-        {/* Bed bottom right */}
+        {/* Bed bottom right - gentle float */}
         <motion.div
-          className="absolute right-[15%] bottom-[18%] z-10"
+          animate={{ y: [0, -2, 0] }}
+          transition={{ duration: 3, repeat: Infinity }}
+          whileHover={{ scale: 1.05 }}
+          className="absolute right-[12%] bottom-[16%] z-10 cursor-pointer"
         >
-          <Image src="/cat-items/bed.png" alt="bed" width={120} height={80} className="pixelated" />
+          <Image src="/cat-items/bed.png" alt="bed" width={130} height={90} className="pixelated drop-shadow-lg" />
         </motion.div>
 
-        {/* Toy ball left side */}
+        {/* Animated blue ball - rotates */}
         <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 4, repeat: Infinity, ease: 'linear' }}
-          className="absolute left-[25%] bottom-[35%] z-10"
+          animate={{ rotate: 360, y: [0, -8, 0] }}
+          transition={{ 
+            rotate: { duration: 4, repeat: Infinity, ease: 'linear' },
+            y: { duration: 2, repeat: Infinity }
+          }}
+          whileHover={{ scale: 1.2 }}
+          className="absolute left-[20%] bottom-[38%] z-10 cursor-pointer"
         >
-          <Image src="/cat-items/ball.gif" alt="ball" width={50} height={50} className="pixelated" />
+          <Image src="/cat-items/ball.gif" alt="ball" width={60} height={60} className="pixelated drop-shadow-lg" />
         </motion.div>
 
-        {/* Mouse toy right side */}
+        {/* Fish toy - wiggles */}
         <motion.div
-          animate={{ x: [0, 10, 0] }}
+          animate={{ rotate: [-5, 5, -5], x: [0, 3, 0] }}
           transition={{ duration: 1.5, repeat: Infinity }}
-          className="absolute right-[25%] bottom-[40%] z-10"
+          whileHover={{ scale: 1.15, rotate: 15 }}
+          className="absolute right-[22%] bottom-[35%] z-10 cursor-pointer"
         >
-          <Image src="/cat-items/mouse.gif" alt="mouse" width={50} height={50} className="pixelated" />
+          <Image src="/cat-items/fish.png" alt="fish" width={50} height={50} className="pixelated drop-shadow-lg" />
         </motion.div>
 
-        {/* Bathtub top center */}
+        {/* Scratching post - sways */}
         <motion.div
-          className="absolute left-1/2 transform -translate-x-1/2 top-[15%] z-10"
+          animate={{ rotate: [-2, 2, -2] }}
+          transition={{ duration: 2.5, repeat: Infinity }}
+          whileHover={{ scale: 1.08 }}
+          className="absolute left-[8%] bottom-[30%] z-10 cursor-pointer"
         >
-          <Image src="/cat-items/bathtub.png" alt="bathtub" width={100} height={80} className="pixelated" />
+          <Image src="/cat-items/toy.gif" alt="toy" width={55} height={55} className="pixelated drop-shadow-lg" />
+        </motion.div>
+
+        {/* Pink ball top right - bounces */}
+        <motion.div
+          animate={{ 
+            y: [0, -15, 0],
+            rotate: [0, 180, 360]
+          }}
+          transition={{ 
+            duration: 3, 
+            repeat: Infinity,
+            ease: 'easeInOut'
+          }}
+          whileHover={{ scale: 1.2 }}
+          className="absolute right-[28%] top-[25%] z-10 cursor-pointer"
+        >
+          <Image src="/cat-items/ball.gif" alt="pink ball" width={45} height={45} className="pixelated drop-shadow-lg" />
         </motion.div>
       </div>
 

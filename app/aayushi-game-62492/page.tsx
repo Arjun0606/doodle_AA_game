@@ -31,6 +31,7 @@ const CAT_SPRITES: Record<CatState, string> = {
 
 export default function AayushisPetCafe() {
   const [showWelcome, setShowWelcome] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [catState, setCatState] = useState<CatState>('sleeping');
   const [completedTasks, setCompletedTasks] = useState<Set<TaskId>>(new Set());
   const [showMessage, setShowMessage] = useState(false);
@@ -39,21 +40,16 @@ export default function AayushisPetCafe() {
   const handleTaskClick = (task: Task) => {
     if (completedTasks.has(task.id)) return;
 
-    // Mark task complete
     const newCompleted = new Set(completedTasks).add(task.id);
     setCompletedTasks(newCompleted);
-
-    // Change cat state
     setCatState(task.catState);
     setCelebration(true);
+    setSidebarOpen(false);
 
     setTimeout(() => setCelebration(false), 2000);
 
-    // If all tasks done, show message after animation
     if (newCompleted.size === TASKS.length) {
-      setTimeout(() => {
-        setShowMessage(true);
-      }, 2500);
+      setTimeout(() => setShowMessage(true), 2500);
     }
   };
 
@@ -72,17 +68,17 @@ export default function AayushisPetCafe() {
   // Welcome Screen
   if (showWelcome) {
     return (
-      <div className="fixed inset-0 w-screen h-screen bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400 flex items-center justify-center p-6">
+      <div className="fixed inset-0 w-screen h-screen bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400 flex items-center justify-center p-4 overflow-hidden">
         <motion.div
           initial={{ scale: 0, rotate: -180 }}
           animate={{ scale: 1, rotate: 0 }}
           transition={{ type: 'spring', damping: 10 }}
-          className="bg-white rounded-3xl shadow-2xl p-12 max-w-2xl w-full text-center border-8 border-purple-600"
+          className="bg-white rounded-3xl shadow-2xl p-8 md:p-12 max-w-xl w-full text-center border-8 border-purple-600"
         >
           <motion.h1
             animate={{ scale: [1, 1.1, 1] }}
             transition={{ duration: 2, repeat: Infinity }}
-            className="text-5xl md:text-6xl font-bold text-purple-800 mb-6"
+            className="text-4xl md:text-5xl font-bold text-purple-800 mb-4"
             style={{ fontFamily: "'Comic Neue', 'Comic Sans MS', cursive" }}
           >
             Welcome to
@@ -91,7 +87,7 @@ export default function AayushisPetCafe() {
           <motion.h2
             animate={{ y: [0, -10, 0] }}
             transition={{ duration: 1.5, repeat: Infinity }}
-            className="text-4xl md:text-5xl font-bold text-pink-600 mb-4"
+            className="text-3xl md:text-4xl font-bold text-pink-600 mb-3"
             style={{ fontFamily: "'Comic Neue', 'Comic Sans MS', cursive" }}
           >
             Aayushi's Pet Cafe
@@ -101,31 +97,31 @@ export default function AayushisPetCafe() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5 }}
-            className="text-2xl md:text-3xl text-gray-600 mb-8 italic"
+            className="text-xl md:text-2xl text-gray-600 mb-6 italic"
             style={{ fontFamily: "'Comic Neue', 'Comic Sans MS', cursive" }}
           >
             (that runs at a loss)
           </motion.p>
 
-          <div className="flex justify-center gap-8 mb-8">
+          <div className="flex justify-center gap-6 mb-6">
             <motion.span
               animate={{ rotate: [0, 20, 0] }}
               transition={{ duration: 1, repeat: Infinity }}
-              className="text-7xl"
+              className="text-6xl"
             >
               🐱
             </motion.span>
             <motion.span
               animate={{ scale: [1, 1.3, 1] }}
               transition={{ duration: 1, repeat: Infinity, delay: 0.2 }}
-              className="text-7xl"
+              className="text-6xl"
             >
               💖
             </motion.span>
             <motion.span
               animate={{ rotate: [0, -20, 0] }}
               transition={{ duration: 1, repeat: Infinity, delay: 0.4 }}
-              className="text-7xl"
+              className="text-6xl"
             >
               ☕
             </motion.span>
@@ -135,7 +131,7 @@ export default function AayushisPetCafe() {
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={enterCafe}
-            className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white text-3xl font-bold py-6 px-12 rounded-full shadow-2xl border-4 border-white"
+            className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white text-2xl md:text-3xl font-bold py-4 px-10 rounded-full shadow-2xl border-4 border-white"
             style={{ fontFamily: "'Comic Neue', 'Comic Sans MS', cursive" }}
           >
             Enter Cafe! 🐾
@@ -147,7 +143,7 @@ export default function AayushisPetCafe() {
 
   // Main Game
   return (
-    <div className="fixed inset-0 w-screen h-screen overflow-hidden">
+    <div className="fixed inset-0 w-screen h-screen overflow-hidden bg-gradient-to-b from-sky-200 to-green-100">
       
       {/* Room Background */}
       <div className="absolute inset-0">
@@ -160,13 +156,57 @@ export default function AayushisPetCafe() {
         />
       </div>
 
+      {/* Room Decorations */}
+      <div className="absolute inset-0">
+        {/* Bowl bottom left */}
+        <motion.div
+          animate={{ y: [0, -3, 0] }}
+          transition={{ duration: 2, repeat: Infinity }}
+          className="absolute left-[15%] bottom-[20%] z-10"
+        >
+          <Image src="/cat-items/bowls.png" alt="bowl" width={80} height={60} className="pixelated" />
+        </motion.div>
+
+        {/* Bed bottom right */}
+        <motion.div
+          className="absolute right-[15%] bottom-[18%] z-10"
+        >
+          <Image src="/cat-items/bed.png" alt="bed" width={120} height={80} className="pixelated" />
+        </motion.div>
+
+        {/* Toy ball left side */}
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 4, repeat: Infinity, ease: 'linear' }}
+          className="absolute left-[25%] bottom-[35%] z-10"
+        >
+          <Image src="/cat-items/ball.gif" alt="ball" width={50} height={50} className="pixelated" />
+        </motion.div>
+
+        {/* Mouse toy right side */}
+        <motion.div
+          animate={{ x: [0, 10, 0] }}
+          transition={{ duration: 1.5, repeat: Infinity }}
+          className="absolute right-[25%] bottom-[40%] z-10"
+        >
+          <Image src="/cat-items/mouse.gif" alt="mouse" width={50} height={50} className="pixelated" />
+        </motion.div>
+
+        {/* Bathtub top center */}
+        <motion.div
+          className="absolute left-1/2 transform -translate-x-1/2 top-[15%] z-10"
+        >
+          <Image src="/cat-items/bathtub.png" alt="bathtub" width={100} height={80} className="pixelated" />
+        </motion.div>
+      </div>
+
       {/* Celebration Confetti */}
       {celebration && (
         <div className="absolute inset-0 pointer-events-none z-50">
           {[...Array(50)].map((_, i) => (
             <motion.div
               key={i}
-              className="absolute text-5xl"
+              className="absolute text-4xl"
               initial={{ 
                 x: typeof window !== 'undefined' ? window.innerWidth / 2 : 200, 
                 y: typeof window !== 'undefined' ? window.innerHeight / 2 : 400,
@@ -186,90 +226,133 @@ export default function AayushisPetCafe() {
         </div>
       )}
 
-      {/* Animated Cat */}
-      <motion.div
+      {/* Animated Cat with PROPER SPRITE ANIMATION */}
+      <div
         key={catState}
-        initial={{ scale: 0.8, opacity: 0 }}
-        animate={{ 
-          scale: 1, 
-          opacity: 1,
-          y: celebration ? [0, -30, 0] : [0, -5, 0]
+        className="absolute bottom-[35%] left-1/2 transform -translate-x-1/2 z-30"
+        style={{
+          width: '128px',
+          height: '128px',
         }}
-        transition={{
-          scale: { duration: 0.5 },
-          opacity: { duration: 0.5 },
-          y: { duration: celebration ? 0.6 : 3, repeat: Infinity, repeatType: 'reverse' }
-        }}
-        className="absolute bottom-[25%] left-1/2 transform -translate-x-1/2 z-30"
       >
-        <Image
-          src={CAT_SPRITES[catState]}
-          alt="cat"
-          width={200}
-          height={200}
-          className="pixelated drop-shadow-2xl"
-        />
-      </motion.div>
-
-      {/* Task Buttons */}
-      <div className="absolute top-6 left-6 right-6 z-40">
-        <div className="bg-white/95 rounded-3xl shadow-2xl p-6 border-4 border-purple-600">
-          <h2 
-            className="text-3xl font-bold text-purple-800 mb-4 text-center"
-            style={{ fontFamily: "'Comic Neue', 'Comic Sans MS', cursive" }}
-          >
-            Tasks for Kitty! 🐱
-          </h2>
-          
-          <div className="grid grid-cols-2 gap-4">
-            {TASKS.map((task) => {
-              const completed = completedTasks.has(task.id);
-              return (
-                <motion.button
-                  key={task.id}
-                  whileHover={{ scale: completed ? 1 : 1.05 }}
-                  whileTap={{ scale: completed ? 1 : 0.95 }}
-                  onClick={() => handleTaskClick(task)}
-                  disabled={completed}
-                  className={`
-                    p-5 rounded-2xl font-bold text-xl border-4 shadow-lg transition-all
-                    ${completed 
-                      ? 'bg-green-400 border-green-600 text-green-900 opacity-70 cursor-default' 
-                      : 'bg-gradient-to-br from-yellow-300 to-yellow-400 border-yellow-500 text-purple-900 hover:from-yellow-200 hover:to-yellow-300 cursor-pointer'
-                    }
-                  `}
-                  style={{ fontFamily: "'Comic Neue', 'Comic Sans MS', cursive" }}
-                >
-                  <div className="flex items-center justify-center gap-3">
-                    <span className="text-4xl">{task.icon}</span>
-                    <span>{task.label}</span>
-                  </div>
-                  {completed && (
-                    <motion.div
-                      initial={{ scale: 0, rotate: -180 }}
-                      animate={{ scale: 1, rotate: 0 }}
-                      className="text-3xl mt-2"
-                    >
-                      ✅
-                    </motion.div>
-                  )}
-                </motion.button>
-              );
-            })}
-          </div>
-
-          <div className="mt-4 text-center">
-            <span 
-              className="text-2xl font-bold text-purple-700"
-              style={{ fontFamily: "'Comic Neue', 'Comic Sans MS', cursive" }}
-            >
-              {completedTasks.size} / {TASKS.length} Complete ⭐
-            </span>
-          </div>
-        </div>
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ 
+            scale: 1, 
+            opacity: 1,
+            y: celebration ? [0, -30, 0] : 0
+          }}
+          transition={{
+            scale: { duration: 0.5 },
+            opacity: { duration: 0.5 },
+            y: { duration: celebration ? 0.6 : 0 }
+          }}
+          style={{
+            width: '128px',
+            height: '128px',
+            position: 'relative',
+          }}
+        >
+          <div
+            className="sprite-animate"
+            style={{
+              width: '128px',
+              height: '32px',
+              backgroundImage: `url(${CAT_SPRITES[catState]})`,
+              backgroundSize: '128px 32px',
+              backgroundRepeat: 'no-repeat',
+              imageRendering: 'pixelated',
+              transform: 'scale(4)',
+              transformOrigin: 'top left',
+              position: 'absolute',
+            }}
+          />
+        </motion.div>
       </div>
 
-      {/* Reset Button (after all tasks complete) */}
+      {/* Sidebar Toggle Button */}
+      <motion.button
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={() => setSidebarOpen(!sidebarOpen)}
+        className="fixed top-4 left-4 z-50 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white text-lg font-bold py-3 px-6 rounded-full shadow-2xl border-3 border-white"
+        style={{ fontFamily: "'Comic Neue', 'Comic Sans MS', cursive" }}
+      >
+        {sidebarOpen ? '✕ Close' : '☰ Tasks'} ({completedTasks.size}/{TASKS.length})
+      </motion.button>
+
+      {/* Sidebar */}
+      <AnimatePresence>
+        {sidebarOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSidebarOpen(false)}
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
+            />
+            
+            <motion.div
+              initial={{ x: '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '-100%' }}
+              transition={{ type: 'spring', damping: 25 }}
+              className="fixed left-0 top-0 bottom-0 w-80 bg-gradient-to-b from-purple-100 to-pink-100 border-r-8 border-purple-600 shadow-2xl z-50 overflow-y-auto"
+            >
+              <div className="p-6 space-y-4">
+                <h2 
+                  className="text-3xl font-bold text-purple-800 text-center mb-6"
+                  style={{ fontFamily: "'Comic Neue', 'Comic Sans MS', cursive" }}
+                >
+                  Tasks for Kitty! 🐱
+                </h2>
+
+                {TASKS.map((task) => {
+                  const completed = completedTasks.has(task.id);
+                  return (
+                    <motion.button
+                      key={task.id}
+                      initial={{ x: -50, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      whileHover={{ scale: completed ? 1 : 1.03 }}
+                      whileTap={{ scale: completed ? 1 : 0.97 }}
+                      onClick={() => handleTaskClick(task)}
+                      disabled={completed}
+                      className={`
+                        w-full p-5 rounded-2xl font-bold text-xl border-4 shadow-lg transition-all
+                        ${completed 
+                          ? 'bg-green-400 border-green-600 text-green-900 opacity-70 cursor-default' 
+                          : 'bg-gradient-to-br from-yellow-300 to-yellow-400 border-yellow-500 text-purple-900 hover:from-yellow-200 hover:to-yellow-300 cursor-pointer'
+                        }
+                      `}
+                      style={{ fontFamily: "'Comic Neue', 'Comic Sans MS', cursive" }}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <span className="text-4xl">{task.icon}</span>
+                          <span>{task.label}</span>
+                        </div>
+                        {completed && (
+                          <motion.span
+                            initial={{ scale: 0, rotate: -180 }}
+                            animate={{ scale: 1, rotate: 0 }}
+                            className="text-3xl"
+                          >
+                            ✅
+                          </motion.span>
+                        )}
+                      </div>
+                    </motion.button>
+                  );
+                })}
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Reset Button */}
       {allTasksComplete && (
         <motion.button
           initial={{ scale: 0, y: 100 }}
@@ -277,21 +360,21 @@ export default function AayushisPetCafe() {
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
           onClick={resetGame}
-          className="fixed bottom-8 right-8 z-40 bg-gradient-to-r from-green-400 to-blue-500 hover:from-green-500 hover:to-blue-600 text-white text-2xl font-bold py-5 px-10 rounded-full shadow-2xl border-4 border-white"
+          className="fixed bottom-6 right-6 z-40 bg-gradient-to-r from-green-400 to-blue-500 hover:from-green-500 hover:to-blue-600 text-white text-xl font-bold py-4 px-8 rounded-full shadow-2xl border-4 border-white"
           style={{ fontFamily: "'Comic Neue', 'Comic Sans MS', cursive" }}
         >
           🔄 Play Again!
         </motion.button>
       )}
 
-      {/* Message Modal (ONLY after ALL tasks complete) */}
+      {/* Message Modal */}
       <AnimatePresence>
         {showMessage && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-6"
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
             onClick={() => setShowMessage(false)}
           >
             <motion.div
@@ -306,11 +389,11 @@ export default function AayushisPetCafe() {
               exit={{ scale: 0, rotate: 15, y: -100 }}
               transition={{ type: 'spring', damping: 15 }}
               onClick={(e) => e.stopPropagation()}
-              className="relative bg-gradient-to-br from-yellow-50 via-pink-50 to-purple-50 rounded-3xl border-8 border-purple-700 p-10 md:p-14 max-w-3xl w-full shadow-2xl"
+              className="relative bg-gradient-to-br from-yellow-50 via-pink-50 to-purple-50 rounded-3xl border-8 border-purple-700 p-8 md:p-12 max-w-2xl w-full shadow-2xl overflow-y-auto max-h-[90vh]"
             >
               <button
                 onClick={() => setShowMessage(false)}
-                className="absolute top-5 right-5 w-14 h-14 bg-purple-600 hover:bg-purple-700 rounded-full text-white text-4xl flex items-center justify-center border-4 border-white shadow-lg transition-transform active:scale-90"
+                className="absolute top-4 right-4 w-12 h-12 bg-purple-600 hover:bg-purple-700 rounded-full text-white text-3xl flex items-center justify-center border-4 border-white shadow-lg transition-transform active:scale-90 z-10"
               >
                 ×
               </button>
@@ -318,44 +401,44 @@ export default function AayushisPetCafe() {
               <motion.div 
                 animate={{ rotate: [0, 10, 0] }} 
                 transition={{ duration: 2, repeat: Infinity }}
-                className="absolute -top-10 -left-10 text-7xl drop-shadow-2xl"
+                className="absolute -top-8 -left-8 text-6xl drop-shadow-2xl"
               >
                 🕊️
               </motion.div>
 
-              <div className="space-y-6 text-center" style={{ fontFamily: "'Comic Neue', 'Comic Sans MS', cursive" }}>
-                <h2 className="text-4xl md:text-5xl font-bold text-purple-900">
+              <div className="space-y-5 text-center" style={{ fontFamily: "'Comic Neue', 'Comic Sans MS', cursive" }}>
+                <h2 className="text-3xl md:text-4xl font-bold text-purple-900">
                   Hey Aayushi! 🕊️
                 </h2>
 
-                <div className="space-y-5">
-                  <p className="text-2xl md:text-3xl leading-relaxed text-purple-800 font-bold">
+                <div className="space-y-4">
+                  <p className="text-xl md:text-2xl leading-relaxed text-purple-800 font-bold">
                     Fun fact: you're the <span className="text-pink-600">silliest, most adorable girl</span> in the world.
                   </p>
                   
-                  <p className="text-2xl md:text-3xl leading-relaxed text-purple-800 font-bold">
+                  <p className="text-xl md:text-2xl leading-relaxed text-purple-800 font-bold">
                     I care for you <span className="text-red-600 italic">very deeply.</span>
                   </p>
                   
-                  <p className="text-2xl md:text-3xl leading-relaxed text-purple-800 font-bold">
+                  <p className="text-xl md:text-2xl leading-relaxed text-purple-800 font-bold">
                     And I'm <span className="text-yellow-600">always here for you</span> 💛
                   </p>
                 </div>
 
-                <div className="pt-6 border-t-4 border-dashed border-purple-300 space-y-3">
-                  <p className="text-xl md:text-2xl text-purple-700 font-bold">
+                <div className="pt-5 border-t-4 border-dashed border-purple-300 space-y-2">
+                  <p className="text-lg md:text-xl text-purple-700 font-bold">
                     — instagram: <span className="text-purple-900">capedpotato</span>
                   </p>
-                  <p className="text-xl md:text-2xl text-purple-700 font-bold">
+                  <p className="text-lg md:text-xl text-purple-700 font-bold">
                     ph. <span className="text-purple-900">9403783265</span>
                   </p>
-                  <p className="text-lg md:text-xl text-purple-600 mt-4 italic">
+                  <p className="text-base md:text-lg text-purple-600 mt-3 italic">
                     if you wanna reach out 💕
                   </p>
                 </div>
               </div>
 
-              <p className="text-center text-base text-purple-500 mt-8" style={{ fontFamily: "'Comic Neue', 'Comic Sans MS', cursive" }}>
+              <p className="text-center text-sm text-purple-500 mt-6" style={{ fontFamily: "'Comic Neue', 'Comic Sans MS', cursive" }}>
                 Tap X to close 💫
               </p>
             </motion.div>

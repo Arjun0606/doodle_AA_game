@@ -6,7 +6,6 @@ import Animal from '@/components/Animal';
 import FoodItem from '@/components/FoodItem';
 import Bird from '@/components/Bird';
 import MessageNote from '@/components/MessageNote';
-import ReminderPopup from '@/components/ReminderPopup';
 
 type AnimalType = 'cat' | 'bunny' | 'frog' | 'bear';
 
@@ -30,7 +29,6 @@ export default function GamePage() {
   const [showBird, setShowBird] = useState(false);
   const [showMessage, setShowMessage] = useState(false);
   const [showReset, setShowReset] = useState(false);
-  const [showReminder, setShowReminder] = useState(false);
   const [draggedFood, setDraggedFood] = useState<string | null>(null);
 
   const allFed = animals.every(a => a.fullness >= 100);
@@ -43,21 +41,7 @@ export default function GamePage() {
     }
   }, [allFed, showBird]);
 
-  // Random reminder system
-  useEffect(() => {
-    const showRandomReminder = () => {
-      const randomDelay = Math.random() * 60000 + 30000; // 30-90 seconds
-      setTimeout(() => {
-        if (!showMessage) {
-          setShowReminder(true);
-          setTimeout(() => setShowReminder(false), 5000);
-        }
-        showRandomReminder();
-      }, randomDelay);
-    };
-    
-    showRandomReminder();
-  }, [showMessage]);
+  // Random reminder system removed per user request
 
   const feedAnimal = (animalId: AnimalType) => {
     setAnimals(prev =>
@@ -193,10 +177,6 @@ export default function GamePage() {
         )}
       </AnimatePresence>
 
-      {/* Random Reminder Popup */}
-      <AnimatePresence>
-        {showReminder && <ReminderPopup />}
-      </AnimatePresence>
     </div>
   );
 }

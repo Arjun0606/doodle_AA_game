@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
+import SpriteAnimation from '@/components/SpriteAnimation';
 
 type CatState = 'sleeping' | 'eating' | 'playing' | 'cuddling' | 'bathing';
 type TaskId = 'feed' | 'play' | 'pet' | 'bathe';
@@ -14,6 +15,11 @@ interface Task {
   icon: string;
 }
 
+interface SpriteConfig {
+  sheet: string;
+  frames: number;
+}
+
 const TASKS: Task[] = [
   { id: 'feed', label: 'Feed the Cat', catState: 'eating', icon: '🍖' },
   { id: 'play', label: 'Play with Toy', catState: 'playing', icon: '🎾' },
@@ -21,12 +27,12 @@ const TASKS: Task[] = [
   { id: 'bathe', label: 'Bathe the Cat', catState: 'bathing', icon: '🛁' },
 ];
 
-const CAT_SPRITES: Record<CatState, string> = {
-  sleeping: '/cat-sprites/sleep.png',
-  eating: '/cat-sprites/eating.png',
-  playing: '/cat-sprites/excited.png',
-  cuddling: '/cat-sprites/laydown.png',
-  bathing: '/cat-sprites/sleepy.png',
+const CAT_SPRITES: Record<CatState, SpriteConfig> = {
+  sleeping: { sheet: '/cat-sprites/sleep.png', frames: 4 },
+  eating: { sheet: '/cat-sprites/eating.png', frames: 15 },
+  playing: { sheet: '/cat-sprites/excited.png', frames: 12 },
+  cuddling: { sheet: '/cat-sprites/laydown.png', frames: 12 },
+  bathing: { sheet: '/cat-sprites/sleepy.png', frames: 8 },
 };
 
 export default function AayushisPetCafe() {
@@ -226,49 +232,31 @@ export default function AayushisPetCafe() {
         </div>
       )}
 
-      {/* Animated Cat with PROPER SPRITE ANIMATION */}
-      <div
+      {/* Animated Cat with PROPER FRAME-BY-FRAME ANIMATION */}
+      <motion.div
         key={catState}
-        className="absolute bottom-[35%] left-1/2 transform -translate-x-1/2 z-30"
-        style={{
-          width: '128px',
-          height: '128px',
+        initial={{ scale: 0.8, opacity: 0 }}
+        animate={{ 
+          scale: 1, 
+          opacity: 1,
+          y: celebration ? [0, -30, 0] : 0
         }}
+        transition={{
+          scale: { duration: 0.5 },
+          opacity: { duration: 0.5 },
+          y: { duration: celebration ? 0.6 : 0 }
+        }}
+        className="absolute bottom-[35%] left-1/2 transform -translate-x-1/2 z-30"
       >
-        <motion.div
-          initial={{ scale: 0.8, opacity: 0 }}
-          animate={{ 
-            scale: 1, 
-            opacity: 1,
-            y: celebration ? [0, -30, 0] : 0
-          }}
-          transition={{
-            scale: { duration: 0.5 },
-            opacity: { duration: 0.5 },
-            y: { duration: celebration ? 0.6 : 0 }
-          }}
-          style={{
-            width: '128px',
-            height: '128px',
-            position: 'relative',
-          }}
-        >
-          <div
-            className="sprite-animate"
-            style={{
-              width: '128px',
-              height: '32px',
-              backgroundImage: `url(${CAT_SPRITES[catState]})`,
-              backgroundSize: '128px 32px',
-              backgroundRepeat: 'no-repeat',
-              imageRendering: 'pixelated',
-              transform: 'scale(4)',
-              transformOrigin: 'top left',
-              position: 'absolute',
-            }}
-          />
-        </motion.div>
-      </div>
+        <SpriteAnimation
+          spriteSheet={CAT_SPRITES[catState].sheet}
+          frameWidth={32}
+          frameHeight={32}
+          totalFrames={CAT_SPRITES[catState].frames}
+          fps={8}
+          scale={4}
+        />
+      </motion.div>
 
       {/* Sidebar Toggle Button */}
       <motion.button

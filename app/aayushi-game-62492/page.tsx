@@ -1,493 +1,367 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 
-type TaskType = 'feed' | 'play' | 'clean' | 'cuddle' | 'walk' | 'sleep';
-
-interface Task {
-  id: TaskType;
-  title: string;
-  icon: string;
-  completed: boolean;
-  reward: string;
+interface Room {
+  id: number;
+  bg: string;
+  name: string;
+  pets: { type: 'cat' | 'dog'; sprite: string; x: number; y: number }[];
+  items: { type: string; image: string; x: number; y: number; task?: string }[];
 }
 
+const ROOMS: Room[] = [
+  {
+    id: 1,
+    bg: '/rooms/room1.png',
+    name: 'Pink Cozy Room',
+    pets: [
+      { type: 'cat', sprite: '/sprites/cats/cat-pink.png', x: 45, y: 35 }
+    ],
+    items: [
+      { type: 'bowl', image: '/items/bowl.png', x: 25, y: 20, task: 'feed' },
+      { type: 'bed', image: '/items/bed-pink.png', x: 60, y: 15, task: 'sleep' },
+      { type: 'ball', image: '/items/ball-blue.gif', x: 75, y: 25, task: 'play' }
+    ]
+  },
+  {
+    id: 2,
+    bg: '/rooms/room2.png',
+    name: 'Blue Play Room',
+    pets: [
+      { type: 'dog', sprite: '/sprites/dogs/dog-idle.png', x: 50, y: 30 },
+      { type: 'cat', sprite: '/sprites/cats/cat-blue.png', x: 30, y: 35 }
+    ],
+    items: [
+      { type: 'toy', image: '/items/mouse-toy.gif', x: 70, y: 25, task: 'play' },
+      { type: 'bowl', image: '/items/bowls.png', x: 20, y: 15, task: 'feed' }
+    ]
+  },
+  {
+    id: 3,
+    bg: '/rooms/room3.png',
+    name: 'Purple Cat Tower',
+    pets: [
+      { type: 'cat', sprite: '/sprites/cats/cat-yellow.png', x: 55, y: 40 },
+      { type: 'cat', sprite: '/sprites/cats/cat-pink.png', x: 35, y: 20 }
+    ],
+    items: [
+      { type: 'bed', image: '/items/bed-blue.png', x: 25, y: 18, task: 'cuddle' },
+      { type: 'ball', image: '/items/ball-blue.gif', x: 65, y: 22, task: 'play' }
+    ]
+  }
+];
+
 export default function AayushisWorld() {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [tasks, setTasks] = useState<Task[]>([
-    { id: 'feed', title: 'Feed the Pets', icon: '🍖', completed: false, reward: 'bowl' },
-    { id: 'play', title: 'Play with Ball', icon: '🎾', completed: false, reward: 'ball' },
-    { id: 'clean', title: 'Clean Room', icon: '✨', completed: false, reward: 'sparkle' },
-    { id: 'cuddle', title: 'Pet the Cat', icon: '💕', completed: false, reward: 'hearts' },
-    { id: 'walk', title: 'Walk the Dog', icon: '🐕', completed: false, reward: 'dog-walk' },
-    { id: 'sleep', title: 'Bedtime', icon: '🛏️', completed: false, reward: 'bed' },
-  ]);
-
+  const [currentRoom, setCurrentRoom] = useState(0);
+  const [tasksCompleted, setTasksCompleted] = useState(0);
   const [showMessage, setShowMessage] = useState(false);
-  const [catPos, setCatPos] = useState({ x: 30, bottom: 15 });
-  const [dogPos, setDogPos] = useState({ x: 60, bottom: 15 });
-  const [activePets, setActivePets] = useState<string[]>([]);
-  const [visibleItems, setVisibleItems] = useState<string[]>([]);
-  const [confetti, setConfetti] = useState(false);
+  const [celebrationActive, setCelebrationActive] = useState(false);
+  const [interactedItems, setInteractedItems] = useState<Set<string>>(new Set());
 
-  const completeTask = (taskId: TaskType) => {
-    const task = tasks.find(t => t.id === taskId);
-    if (task && !task.completed) {
-      // Mark complete
-      setTasks(prev => prev.map(t => 
-        t.id === taskId ? { ...t, completed: true } : t
-      ));
+  const room = ROOMS[currentRoom];
 
-      // Activate pets
-      setActivePets(['cat', 'dog']);
+  const handleItemClick = (itemKey: string) => {
+    if (!interactedItems.has(itemKey)) {
+      setInteractedItems(new Set(interactedItems).add(itemKey));
+      setTasksCompleted(prev => prev + 1);
+      setCelebrationActive(true);
       
-      // Show reward item
-      setVisibleItems(prev => [...prev, task.reward]);
-      
-      // Confetti!
-      setConfetti(true);
-      setTimeout(() => setConfetti(false), 2000);
-
-      // Show message after animation
       setTimeout(() => {
+        setCelebrationActive(false);
         setShowMessage(true);
-        setActivePets([]);
       }, 1500);
-
-      setMenuOpen(false);
     }
   };
 
-  const closeMessage = () => {
-    setShowMessage(false);
-    // Pets move to random positions
-    setCatPos({ x: Math.random() * 50 + 10, bottom: Math.random() * 20 + 10 });
-    setDogPos({ x: Math.random() * 50 + 40, bottom: Math.random() * 20 + 10 });
+  const nextRoom = () => {
+    if (currentRoom < ROOMS.length - 1) {
+      setCurrentRoom(currentRoom + 1);
+    }
+  };
+
+  const prevRoom = () => {
+    if (currentRoom > 0) {
+      setCurrentRoom(currentRoom - 1);
+    }
   };
 
   const resetGame = () => {
-    setTasks(prev => prev.map(t => ({ ...t, completed: false })));
-    setVisibleItems([]);
-    setCatPos({ x: 30, bottom: 15 });
-    setDogPos({ x: 60, bottom: 15 });
+    setCurrentRoom(0);
+    setTasksCompleted(0);
+    setInteractedItems(new Set());
+    setShowMessage(false);
   };
 
-  const allCompleted = tasks.every(t => t.completed);
-
   return (
-    <div className="fixed inset-0 w-screen h-screen overflow-hidden bg-black">
+    <div className="fixed inset-0 w-screen h-screen overflow-hidden bg-gradient-to-b from-sky-400 via-sky-300 to-green-300">
       
-      {/* Game World Container */}
-      <div className="relative w-full h-full">
-        
-        {/* Background Room */}
-        <div className="absolute inset-0">
+      {/* Room Background */}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={room.id}
+          initial={{ opacity: 0, x: 100 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -100 }}
+          transition={{ duration: 0.4 }}
+          className="absolute inset-0"
+        >
           <Image
-            src="/rooms/room1.png"
-            alt="room"
+            src={room.bg}
+            alt={room.name}
             fill
             className="object-cover pixelated"
             priority
           />
-        </div>
+        </motion.div>
+      </AnimatePresence>
 
-        {/* Floor/Ground indicator */}
-        <div className="absolute bottom-0 left-0 right-0 h-4 bg-amber-900/30 border-t-4 border-amber-800/50" />
-
-        {/* Confetti */}
-        {confetti && (
-          <div className="absolute inset-0 pointer-events-none z-50">
-            {[...Array(30)].map((_, i) => (
-              <motion.div
-                key={i}
-                className="absolute"
-                initial={{ 
-                  x: typeof window !== 'undefined' ? window.innerWidth / 2 : 200, 
-                  y: typeof window !== 'undefined' ? window.innerHeight / 2 : 400,
-                  scale: 0 
-                }}
-                animate={{
-                  x: Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 400),
-                  y: Math.random() * (typeof window !== 'undefined' ? window.innerHeight : 800),
-                  scale: [0, 1, 0],
-                  rotate: Math.random() * 720
-                }}
-                transition={{ duration: 1.5, delay: i * 0.02 }}
-              >
-                <span className="text-3xl">
-                  {['💖', '✨', '🌟', '💫', '💕', '🎉'][Math.floor(Math.random() * 6)]}
-                </span>
-              </motion.div>
-            ))}
-          </div>
-        )}
-
-        {/* Interactive Items */}
-        <AnimatePresence>
-          {visibleItems.includes('bowl') && (
+      {/* Celebration Confetti */}
+      {celebrationActive && (
+        <div className="absolute inset-0 pointer-events-none z-50">
+          {[...Array(40)].map((_, i) => (
             <motion.div
-              initial={{ scale: 0, y: -50 }}
-              animate={{ scale: 1, y: 0 }}
-              className="absolute left-[20%] bottom-[25%] z-10"
+              key={i}
+              className="absolute text-4xl"
+              initial={{ 
+                x: typeof window !== 'undefined' ? window.innerWidth / 2 : 200, 
+                y: typeof window !== 'undefined' ? window.innerHeight / 2 : 400,
+                scale: 0 
+              }}
+              animate={{
+                x: Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 400),
+                y: Math.random() * (typeof window !== 'undefined' ? window.innerHeight : 800),
+                scale: [0, 1.5, 0],
+                rotate: Math.random() * 720
+              }}
+              transition={{ duration: 2, delay: i * 0.03 }}
             >
-              <Image src="/items/bowl.png" alt="bowl" width={60} height={40} className="pixelated drop-shadow-2xl" />
+              {['💖', '✨', '🌟', '💫', '💕', '🎉', '⭐', '🎊'][Math.floor(Math.random() * 8)]}
             </motion.div>
-          )}
+          ))}
+        </div>
+      )}
 
-          {visibleItems.includes('ball') && (
-            <motion.div
-              initial={{ scale: 0, x: -100 }}
+      {/* Interactive Items in Room */}
+      <AnimatePresence>
+        {room.items.map((item, idx) => {
+          const itemKey = `${room.id}-${idx}`;
+          const interacted = interactedItems.has(itemKey);
+          
+          return (
+            <motion.button
+              key={itemKey}
+              initial={{ scale: 0 }}
               animate={{ 
-                scale: 1, 
-                x: 0,
-                rotate: [0, 360]
+                scale: interacted ? 0.9 : 1,
+                y: interacted ? 0 : [0, -5, 0],
+                opacity: interacted ? 0.6 : 1
               }}
               transition={{
-                rotate: { duration: 2, repeat: Infinity, ease: 'linear' }
+                y: { duration: 2, repeat: Infinity, repeatType: 'reverse' },
+                scale: { duration: 0.3 }
               }}
-              className="absolute right-[25%] bottom-[30%] z-10"
+              onClick={() => !interacted && handleItemClick(itemKey)}
+              disabled={interacted}
+              className={`absolute z-30 ${interacted ? 'cursor-default' : 'cursor-pointer hover:scale-110 active:scale-95'} transition-transform`}
+              style={{
+                left: `${item.x}%`,
+                bottom: `${item.y}%`,
+              }}
             >
-              <Image src="/items/ball-blue.gif" alt="ball" width={50} height={50} className="pixelated drop-shadow-2xl" />
-            </motion.div>
-          )}
-
-          {visibleItems.includes('bed') && (
-            <motion.div
-              initial={{ scale: 0, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              className="absolute left-[15%] bottom-[15%] z-5"
-            >
-              <Image src="/items/bed-pink.png" alt="bed" width={100} height={60} className="pixelated drop-shadow-2xl" />
-            </motion.div>
-          )}
-
-          {visibleItems.includes('sparkle') && (
-            <>
-              {[...Array(5)].map((_, i) => (
+              <Image 
+                src={item.image} 
+                alt={item.type} 
+                width={item.type === 'bed' ? 120 : item.type === 'bowl' || item.type === 'bowls' ? 80 : 70}
+                height={item.type === 'bed' ? 80 : item.type === 'bowl' || item.type === 'bowls' ? 60 : 70}
+                className="pixelated drop-shadow-2xl" 
+              />
+              {!interacted && (
                 <motion.div
-                  key={i}
-                  initial={{ scale: 0, opacity: 0 }}
-                  animate={{ 
-                    scale: [0, 1, 0],
-                    opacity: [0, 1, 0],
-                    y: [0, -30]
-                  }}
-                  transition={{ 
-                    duration: 1.5, 
-                    delay: i * 0.2,
-                    repeat: Infinity,
-                    repeatDelay: 1
-                  }}
-                  className="absolute z-20"
-                  style={{
-                    left: `${20 + i * 15}%`,
-                    bottom: `${40 + i * 5}%`
-                  }}
+                  animate={{ scale: [1, 1.2, 1] }}
+                  transition={{ duration: 1, repeat: Infinity }}
+                  className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-yellow-400 px-4 py-2 rounded-full text-sm font-bold shadow-lg border-2 border-white"
                 >
-                  <span className="text-4xl">✨</span>
+                  Tap!
                 </motion.div>
-              ))}
-            </>
-          )}
+              )}
+            </motion.button>
+          );
+        })}
+      </AnimatePresence>
 
-          {visibleItems.includes('hearts') && (
-            <>
-              {[...Array(6)].map((_, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ scale: 0, y: 0 }}
-                  animate={{ 
-                    scale: [0, 1, 1],
-                    y: [-20, -60],
-                    opacity: [0, 1, 0]
-                  }}
-                  transition={{ 
-                    duration: 2, 
-                    delay: i * 0.3,
-                    repeat: Infinity,
-                    repeatDelay: 0.5
-                  }}
-                  className="absolute z-20"
-                  style={{
-                    left: `${catPos.x + 5}%`,
-                    bottom: `${catPos.bottom + 15}%`
-                  }}
-                >
-                  <span className="text-3xl">💕</span>
-                </motion.div>
-              ))}
-            </>
-          )}
-        </AnimatePresence>
-
-        {/* Animated Cat */}
+      {/* Pets in Room */}
+      {room.pets.map((pet, idx) => (
         <motion.div
-          className="absolute z-20"
-          animate={{
-            left: `${catPos.x}%`,
-            bottom: `${catPos.bottom}%`,
+          key={`${room.id}-pet-${idx}`}
+          initial={{ scale: 0, rotate: -180 }}
+          animate={{ 
+            scale: 1, 
+            rotate: 0,
+            y: celebrationActive ? [0, -15, 0] : [0, -3, 0]
           }}
-          transition={{ duration: activePets.includes('cat') ? 1 : 0.5 }}
-        >
-          <motion.div
-            animate={{
-              y: activePets.includes('cat') ? [0, -10, 0] : 0,
-              rotate: activePets.includes('cat') ? [-5, 5, -5, 0] : 0,
-            }}
-            transition={{ 
-              duration: 0.6, 
-              repeat: activePets.includes('cat') ? 3 : 0 
-            }}
-          >
-            <Image
-              src="/sprites/cats/cat-pink.png"
-              alt="cat"
-              width={80}
-              height={80}
-              className="pixelated drop-shadow-2xl"
-            />
-          </motion.div>
-        </motion.div>
-
-        {/* Animated Dog */}
-        <motion.div
-          className="absolute z-20"
-          animate={{
-            left: `${dogPos.x}%`,
-            bottom: `${dogPos.bottom}%`,
+          transition={{
+            scale: { duration: 0.5 },
+            rotate: { duration: 0.5 },
+            y: { duration: celebrationActive ? 0.5 : 2, repeat: Infinity, repeatType: 'reverse' }
           }}
-          transition={{ duration: activePets.includes('dog') ? 1.5 : 0.5 }}
+          className="absolute z-20"
+          style={{
+            left: `${pet.x}%`,
+            bottom: `${pet.y}%`,
+          }}
         >
-          <motion.div
-            animate={{
-              y: activePets.includes('dog') ? [0, -8, 0] : 0,
-              scaleX: activePets.includes('dog') && visibleItems.includes('dog-walk') ? [-1, -1] : 1,
-            }}
-            transition={{ 
-              duration: 0.5, 
-              repeat: activePets.includes('dog') ? 4 : 0 
-            }}
-          >
-            <Image
-              src="/sprites/dogs/dog-idle.png"
-              alt="dog"
-              width={90}
-              height={90}
-              className="pixelated drop-shadow-2xl"
-            />
-          </motion.div>
+          <Image
+            src={pet.sprite}
+            alt={pet.type}
+            width={pet.type === 'dog' ? 100 : 85}
+            height={pet.type === 'dog' ? 100 : 85}
+            className="pixelated drop-shadow-2xl"
+          />
         </motion.div>
+      ))}
 
-        {/* Menu Button */}
+      {/* Navigation Arrows */}
+      {currentRoom > 0 && (
         <motion.button
-          onClick={() => setMenuOpen(!menuOpen)}
+          whileHover={{ scale: 1.1, x: -5 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={prevRoom}
+          className="fixed left-6 top-1/2 transform -translate-y-1/2 z-40 bg-white/90 hover:bg-white p-6 rounded-full shadow-2xl border-4 border-purple-500"
+        >
+          <span className="text-5xl">←</span>
+        </motion.button>
+      )}
+
+      {currentRoom < ROOMS.length - 1 && (
+        <motion.button
+          whileHover={{ scale: 1.1, x: 5 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={nextRoom}
+          className="fixed right-6 top-1/2 transform -translate-y-1/2 z-40 bg-white/90 hover:bg-white p-6 rounded-full shadow-2xl border-4 border-purple-500"
+        >
+          <span className="text-5xl">→</span>
+        </motion.button>
+      )}
+
+      {/* Top UI Bar */}
+      <div className="fixed top-0 left-0 right-0 z-40 bg-gradient-to-b from-purple-600 to-purple-500 px-6 py-4 flex items-center justify-between border-b-4 border-white shadow-xl">
+        <div className="text-white cartoon-font text-xl md:text-2xl font-bold" style={{ textShadow: '2px 2px 0 #000' }}>
+          {room.name}
+        </div>
+        <div className="flex items-center gap-4">
+          <div className="bg-yellow-300 px-6 py-3 rounded-full border-3 border-white shadow-lg cartoon-font text-lg md:text-xl font-bold text-purple-900">
+            Room {currentRoom + 1}/{ROOMS.length}
+          </div>
+          <div className="bg-pink-400 px-6 py-3 rounded-full border-3 border-white shadow-lg cartoon-font text-lg md:text-xl font-bold text-white" style={{ textShadow: '1px 1px 0 #000' }}>
+            {tasksCompleted} Tasks ✨
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom Instructions */}
+      <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-40 bg-white/95 px-8 py-4 rounded-full shadow-2xl border-4 border-purple-500">
+        <p className="cartoon-font text-lg md:text-xl text-purple-900 font-bold">
+          Tap items to interact! 🎮
+        </p>
+      </div>
+
+      {/* Reset Button */}
+      {tasksCompleted >= 3 && (
+        <motion.button
+          initial={{ scale: 0, y: 100 }}
+          animate={{ scale: 1, y: 0 }}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          className="fixed top-6 left-6 z-40 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-8 py-4 rounded-2xl border-4 border-white shadow-2xl cartoon-font text-xl"
+          onClick={resetGame}
+          className="fixed bottom-24 right-6 z-40 bg-gradient-to-r from-green-400 to-blue-500 hover:from-green-500 hover:to-blue-600 text-white px-8 py-4 rounded-full border-4 border-white shadow-2xl cartoon-font text-xl font-bold"
           style={{ textShadow: '2px 2px 0 #000' }}
         >
-          {menuOpen ? '✕ Close' : '☰ Tasks'}
+          🔄 Reset Game
         </motion.button>
+      )}
 
-        {/* Progress Counter */}
-        <div className="fixed top-6 right-6 z-40 bg-gradient-to-r from-yellow-400 to-orange-400 px-8 py-4 rounded-2xl border-4 border-white shadow-2xl cartoon-font text-xl text-white"
-          style={{ textShadow: '2px 2px 0 #000' }}
-        >
-          {tasks.filter(t => t.completed).length}/{tasks.length} ⭐
-        </div>
-
-        {/* Side Menu */}
-        <AnimatePresence>
-          {menuOpen && (
-            <>
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                onClick={() => setMenuOpen(false)}
-                className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
-              />
-              
-              <motion.div
-                initial={{ x: '-100%' }}
-                animate={{ x: 0 }}
-                exit={{ x: '-100%' }}
-                transition={{ type: 'spring', damping: 20 }}
-                className="fixed left-0 top-0 bottom-0 w-96 bg-gradient-to-b from-indigo-600 via-purple-600 to-pink-600 border-r-8 border-white shadow-2xl z-50 overflow-y-auto"
-              >
-                <div className="p-8 space-y-4">
-                  <h2 className="text-3xl cartoon-font text-white text-center mb-8" style={{ textShadow: '3px 3px 0 #000' }}>
-                    Tasks 🎮
-                  </h2>
-
-                  {tasks.map((task, i) => (
-                    <motion.button
-                      key={task.id}
-                      initial={{ x: -50, opacity: 0 }}
-                      animate={{ x: 0, opacity: 1 }}
-                      transition={{ delay: i * 0.08 }}
-                      onClick={() => completeTask(task.id)}
-                      disabled={task.completed}
-                      whileHover={{ scale: task.completed ? 1 : 1.02 }}
-                      whileTap={{ scale: task.completed ? 1 : 0.98 }}
-                      className={`
-                        w-full p-6 rounded-2xl border-4 shadow-lg
-                        cartoon-font text-xl transition-all
-                        ${task.completed 
-                          ? 'bg-green-400 border-green-600 text-green-900 opacity-70' 
-                          : 'bg-yellow-300 hover:bg-yellow-200 border-yellow-500 text-purple-900 active:bg-yellow-400'
-                        }
-                      `}
-                      style={{ textShadow: task.completed ? 'none' : '1px 1px 0 rgba(0,0,0,0.1)' }}
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="flex items-center gap-4">
-                          <span className="text-4xl">{task.icon}</span>
-                          <span>{task.title}</span>
-                        </span>
-                        {task.completed && (
-                          <motion.span 
-                            initial={{ scale: 0, rotate: -180 }}
-                            animate={{ scale: 1, rotate: 0 }}
-                            className="text-3xl"
-                          >
-                            ✅
-                          </motion.span>
-                        )}
-                      </div>
-                    </motion.button>
-                  ))}
-
-                  {allCompleted && (
-                    <motion.button
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      onClick={resetGame}
-                      className="w-full mt-8 p-6 bg-gradient-to-r from-green-400 to-blue-400 hover:from-green-500 hover:to-blue-500 rounded-2xl border-4 border-white text-white cartoon-font text-xl shadow-2xl"
-                      style={{ textShadow: '2px 2px 0 #000' }}
-                    >
-                      🔄 Play Again!
-                    </motion.button>
-                  )}
-                </div>
-              </motion.div>
-            </>
-          )}
-        </AnimatePresence>
-
-        {/* Message Modal */}
-        <AnimatePresence>
-          {showMessage && (
+      {/* Message Modal */}
+      <AnimatePresence>
+        {showMessage && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-6"
+            onClick={() => setShowMessage(false)}
+          >
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 flex items-center justify-center p-6"
-              onClick={closeMessage}
+              className="absolute inset-0 bg-black/80 backdrop-blur-lg"
+            />
+
+            <motion.div
+              initial={{ scale: 0, rotate: -15, y: 100 }}
+              animate={{ scale: 1, rotate: 0, y: 0 }}
+              exit={{ scale: 0, rotate: 15, y: -100 }}
+              transition={{ type: 'spring', damping: 12 }}
+              onClick={(e) => e.stopPropagation()}
+              className="relative bg-gradient-to-br from-yellow-50 via-pink-50 to-purple-50 rounded-3xl border-8 border-purple-700 p-8 md:p-12 max-w-2xl w-full shadow-2xl"
             >
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="absolute inset-0 bg-black/80 backdrop-blur-lg"
-              />
-
-              <motion.div
-                initial={{ scale: 0, rotate: -15, y: 100 }}
-                animate={{ scale: 1, rotate: 0, y: 0 }}
-                exit={{ scale: 0, rotate: 15, y: -100 }}
-                transition={{ type: 'spring', damping: 12 }}
-                onClick={(e) => e.stopPropagation()}
-                className="relative bg-gradient-to-br from-yellow-100 via-pink-100 to-purple-100 rounded-3xl border-8 border-purple-700 p-10 max-w-2xl w-full shadow-2xl"
-                style={{
-                  boxShadow: '0 30px 90px rgba(0,0,0,0.6), inset 0 3px 0 rgba(255,255,255,0.8)'
-                }}
+              <button
+                onClick={() => setShowMessage(false)}
+                className="absolute top-4 right-4 w-12 h-12 bg-purple-600 hover:bg-purple-700 rounded-full text-white text-3xl flex items-center justify-center border-4 border-white shadow-lg transition-transform active:scale-90"
               >
-                <button
-                  onClick={closeMessage}
-                  className="absolute top-5 right-5 w-14 h-14 bg-purple-600 hover:bg-purple-700 rounded-full text-white text-4xl flex items-center justify-center border-4 border-white shadow-lg transition-transform active:scale-90"
-                >
-                  ×
-                </button>
+                ×
+              </button>
 
-                <motion.div 
-                  animate={{ rotate: [0, 10, 0] }} 
-                  transition={{ duration: 2, repeat: Infinity }}
-                  className="absolute -top-10 -left-10 text-7xl drop-shadow-2xl"
-                >
-                  🕊️
-                </motion.div>
-                <motion.div 
-                  animate={{ rotate: [0, -10, 0] }} 
-                  transition={{ duration: 2, repeat: Infinity }}
-                  className="absolute -bottom-10 -right-10 text-7xl drop-shadow-2xl"
-                >
-                  ✨
-                </motion.div>
+              <motion.div 
+                animate={{ rotate: [0, 10, 0] }} 
+                transition={{ duration: 2, repeat: Infinity }}
+                className="absolute -top-8 -left-8 text-6xl drop-shadow-2xl"
+              >
+                🕊️
+              </motion.div>
 
-                <div className="space-y-8 text-center">
-                  <motion.h2
-                    initial={{ y: -20, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ delay: 0.2 }}
-                    className="text-4xl cartoon-font text-purple-900"
-                    style={{ textShadow: '2px 2px 0 rgba(255,255,255,0.5)' }}
-                  >
-                    Hey Aayushi! 🕊️
-                  </motion.h2>
+              <div className="space-y-6 text-center">
+                <h2 className="text-3xl md:text-4xl cartoon-font text-purple-900 font-bold">
+                  Hey Aayushi! 🕊️
+                </h2>
 
-                  <motion.div
-                    initial={{ y: 20, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    transition={{ delay: 0.4 }}
-                    className="space-y-6"
-                  >
-                    <p className="text-2xl leading-relaxed text-purple-800 cartoon-font">
-                      Fun fact: you're the <span className="text-pink-600 font-bold">silliest, most adorable girl</span> in the world.
-                    </p>
-                    
-                    <p className="text-2xl leading-relaxed text-purple-800 cartoon-font">
-                      I care for you <span className="text-red-600 font-bold italic">very deeply.</span>
-                    </p>
-                    
-                    <p className="text-2xl leading-relaxed text-purple-800 cartoon-font">
-                      And I'm <span className="text-yellow-600 font-bold">always here for you</span> 💛
-                    </p>
-                  </motion.div>
-
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ delay: 0.6 }}
-                    className="pt-8 border-t-4 border-dashed border-purple-400"
-                  >
-                    <p className="text-xl cartoon-font text-purple-700">
-                      — instagram: <span className="font-bold">capedpotato</span>
-                    </p>
-                    <p className="text-xl cartoon-font text-purple-700">
-                      ph. <span className="font-bold">9403783265</span>
-                    </p>
-                    <p className="text-lg text-purple-600 mt-4 cartoon-font italic">
-                      if you wanna reach out 💕
-                    </p>
-                  </motion.div>
+                <div className="space-y-4">
+                  <p className="text-xl md:text-2xl leading-relaxed text-purple-800 cartoon-font">
+                    Fun fact: you're the <span className="text-pink-600 font-bold">silliest, most adorable girl</span> in the world.
+                  </p>
+                  
+                  <p className="text-xl md:text-2xl leading-relaxed text-purple-800 cartoon-font">
+                    I care for you <span className="text-red-600 font-bold italic">very deeply.</span>
+                  </p>
+                  
+                  <p className="text-xl md:text-2xl leading-relaxed text-purple-800 cartoon-font">
+                    And I'm <span className="text-yellow-600 font-bold">always here for you</span> 💛
+                  </p>
                 </div>
 
-                <motion.p
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: [0, 1, 0] }}
-                  transition={{ delay: 1, duration: 2, repeat: Infinity }}
-                  className="text-center text-base cartoon-font text-purple-500 mt-8"
-                >
-                  Tap anywhere to close 💫
-                </motion.p>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+                <div className="pt-6 border-t-4 border-dashed border-purple-300">
+                  <p className="text-lg md:text-xl cartoon-font text-purple-700">
+                    — instagram: <span className="font-bold">capedpotato</span>
+                  </p>
+                  <p className="text-lg md:text-xl cartoon-font text-purple-700">
+                    ph. <span className="font-bold">9403783265</span>
+                  </p>
+                  <p className="text-base md:text-lg text-purple-600 mt-3 cartoon-font italic">
+                    if you wanna reach out 💕
+                  </p>
+                </div>
+              </div>
 
-      </div>
+              <p className="text-center text-sm cartoon-font text-purple-500 mt-6">
+                Tap X to close 💫
+              </p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
     </div>
   );
 }
